@@ -1,0 +1,13 @@
+./target
+.classpath
+.project
+.settings
+
+gravitymadness-android/target
+gravitymadness-android/libs/
+gravitymadness-android/.externalToolBuilders/
+gravitymadness-android/gen/
+
+gravitymadness-core/target
+gravitymadness-desktop/target
+
