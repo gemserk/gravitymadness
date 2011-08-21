@@ -23,7 +23,7 @@ public class DesktopApplication {
 		// config.width = 1024;
 		// config.height = 768;
 		config.fullscreen = false;
-		config.title = "gravitymadness";
+		config.title = "gravitymadness -  (" + config.width + "," + config.height + ")";
 		config.useGL20 = false;
 		config.useCPUSynch = true;
 		config.forceExit = true;

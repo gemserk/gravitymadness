@@ -1,4 +1,4 @@
-package com.gemserk.games.gravitymadness.gamestates;
+package com.gemserk.games.gravitymadness;
 
 public class Layers {
 
