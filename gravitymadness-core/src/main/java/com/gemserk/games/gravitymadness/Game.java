@@ -23,6 +23,7 @@ import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Parameters;
 import com.gemserk.componentsengine.utils.ParametersWrapper;
+import com.gemserk.games.gravitymadness.gamestates.EditorGameState;
 import com.gemserk.games.gravitymadness.gamestates.PlayGameState;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -117,6 +118,11 @@ public class Game extends com.gemserk.commons.gdx.Game {
 		playGameState.setResourceManager(resourceManager);
 		Screen playScreen = new ScreenImpl(playGameState);
 		setScreen(playScreen);
+		
+		EditorGameState editorGameState = new EditorGameState();
+		editorGameState.setResourceManager(resourceManager);
+		Screen editorScreen = new ScreenImpl(editorGameState);
+//		setScreen(editorScreen);
 
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
 		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {

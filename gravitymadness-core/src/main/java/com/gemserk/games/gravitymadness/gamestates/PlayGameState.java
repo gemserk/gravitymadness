@@ -146,6 +146,7 @@ public class PlayGameState extends GameStateImpl {
 		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(0,4.8f,8,0.1f,0)));
 		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(0,0,0.1f,4.8f,0)));
 		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(8,0,0.1f,4.8f,0)));
+		
 		entityFactory.instantiate(entityTemplates.playerTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(4, 4, 1, 1, 0)));
 		
 		entityBuilder.component(new ScriptComponent(new ScriptJavaImpl() {
