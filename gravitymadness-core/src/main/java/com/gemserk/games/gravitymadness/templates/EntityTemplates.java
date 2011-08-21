@@ -62,8 +62,10 @@ public class EntityTemplates {
 	};
 
 	private Body boxBody(float x, float y, float width, float height, Object userdata) {
-		float centerX = x + width / 2;
-		float centerY = y + height / 2;
+		float halfwidth = width/2;
+		float halfheight = height/2;
+		float centerX = x + halfwidth;
+		float centerY = y + halfheight;
 
 		Body body = bodyBuilder //
 				.fixedRotation() //
@@ -71,7 +73,7 @@ public class EntityTemplates {
 				.position(centerX, centerY) //
 				.type(BodyType.StaticBody) //
 				.fixture(bodyBuilder.fixtureDefBuilder() //
-						.boxShape(width, height)//
+						.boxShape(halfwidth, halfheight)//
 						.density(1f) //
 						.build()) //
 				.build();

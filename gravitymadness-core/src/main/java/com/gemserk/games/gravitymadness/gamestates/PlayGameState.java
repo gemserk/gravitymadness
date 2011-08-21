@@ -64,6 +64,8 @@ public class PlayGameState extends GameStateImpl {
 	private com.gemserk.games.gravitymadness.templates.EntityTemplates entityTemplates;
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 	private CustomGravitySystem customGravitySystem;
+	protected ButtonMonitor upButton;
+	protected ButtonMonitor downButton;
 
 	public PlayGameState(Game game) {
 		this.game = game;
@@ -76,7 +78,7 @@ public class PlayGameState extends GameStateImpl {
 	@Override
 	public void init() {
 		super.init();
-		
+
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();
 
@@ -86,7 +88,7 @@ public class PlayGameState extends GameStateImpl {
 
 		eventManager = new EventListenerManagerImpl();
 
-		physicsWorld = new World(new Vector2(0,0), false);
+		physicsWorld = new World(new Vector2(0, 0), false);
 
 		jointBuilder = new JointBuilder(physicsWorld);
 
@@ -94,7 +96,7 @@ public class PlayGameState extends GameStateImpl {
 		worldCamera.center(centerX, centerY);
 		float zoom = 100;
 		worldCamera.zoom(zoom);
-		worldCamera.move(centerX/zoom, centerY/zoom);
+		worldCamera.move(centerX / zoom, centerY / zoom);
 
 		guiCamera = new Libgdx2dCameraTransformImpl();
 
@@ -113,7 +115,7 @@ public class PlayGameState extends GameStateImpl {
 		customGravitySystem = new CustomGravitySystem();
 		worldWrapper.addUpdateSystem(customGravitySystem);
 		worldWrapper.addUpdateSystem(new ScriptSystem());
-		 worldWrapper.addUpdateSystem(new TagSystem());
+		worldWrapper.addUpdateSystem(new TagSystem());
 		worldWrapper.addUpdateSystem(new ContainerSystem());
 		worldWrapper.addUpdateSystem(new OwnerSystem());
 
@@ -132,73 +134,101 @@ public class PlayGameState extends GameStateImpl {
 			{
 				monitorKeys("pause", Keys.BACK, Keys.ESCAPE);
 				monitorKeys("switchControls", Keys.MENU, Keys.R);
-				monitorKey("extraGravity", Keys.G);
+				monitorKey("left", Keys.LEFT);
+				monitorKey("right", Keys.RIGHT);
+				monitorKey("up", Keys.UP);
+				monitorKey("down", Keys.DOWN);
 			}
 		};
-		
-		
+
 		loadLevel();
 	}
 
 	private void loadLevel() {
 		customGravitySystem.getGravity().set(0, -10);
-		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(0,0,8,0.1f,0)));
-		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(0,4.8f,8,0.1f,0)));
-		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(0,0,0.1f,4.8f,0)));
-		entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(8,0,0.1f,4.8f,0)));
-		
-		entityFactory.instantiate(entityTemplates.playerTemplate,new ParametersWrapper().put("spatial", new SpatialImpl(4, 4, 1, 1, 0)));
-		
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(0, 0, 8, 0.1f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(0, 4.8f, 8, 0.1f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(0, 0, 0.1f, 4.8f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(8, 0, 0.1f, 4.8f, 0)));
+
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(4.510000f, 0.060000f, 0.550000f, 1.420000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(3.010000f, 1.120000f, 1.500000f, 0.350000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(1.130000f, 0.080000f, 0.440000f, 1.430000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(0.070000f, 2.100000f, 1.410000f, 0.420000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(0.680000f, 3.090000f, 2.520000f, 0.420000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(1.710000f, 4.040000f, 0.380000f, 0.730000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(4.380000f, 2.650000f, 1.090000f, 1.530000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(6.290000f, 2.340000f, 0.620000f, 2.410000f, 0)));
+		entityFactory.instantiate(entityTemplates.groundTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(6.320000f, 0.040000f, 0.710000f, 1.260000f, 0)));
+
+		entityFactory.instantiate(entityTemplates.playerTemplate, new ParametersWrapper().put("spatial", new SpatialImpl(4, 1, 1, 1, 0)));
+
 		entityBuilder.component(new ScriptComponent(new ScriptJavaImpl() {
 			Class<PhysicsComponent> physicscomponentclass = PhysicsComponent.class;
-			
+
 			@Override
 			public void update(com.artemis.World world, Entity e) {
 				Entity entity = world.getTagManager().getEntity(Tags.PLAYER_TAG);
 				PhysicsComponent physicsComponent = entity.getComponent(physicscomponentclass);
 				Contact contact = physicsComponent.getContact();
-				if(contact.isInContact()){
-					Body body = physicsComponent.getBody();
-					Vector2 contactForce = contact.getNormal().cpy().mul(10);
-					body.applyForce(contactForce, body.getPosition());
+				if (contact.isInContact()) {
+					// Body body = physicsComponent.getBody();
+					// Vector2 contactForce = contact.getNormal().cpy().mul(10);
+					// body.applyForce(contactForce, body.getPosition());
 				}
-				
+
 			}
-			
+
 			@Override
 			public void init(com.artemis.World world, Entity e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void dispose(com.artemis.World world, Entity e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		})).build();
-		
+
 		entityBuilder.component(new ScriptComponent(new ScriptJavaImpl() {
 			Class<PhysicsComponent> physicscomponentclass = PhysicsComponent.class;
-			private ButtonMonitor button;
-			
+			private ButtonMonitor leftButton;
+			private ButtonMonitor rightButton;
+
+			private Vector2 direction = new Vector2();
+
 			@Override
 			public void update(com.artemis.World world, Entity e) {
-				
-				if(button.isPressed()){
-					customGravitySystem.getGravity().rotate(90);
-				} 
+				direction.set(0, 0);
+				if (upButton.isPressed())
+					direction.add(0, 1);
+				if (downButton.isPressed())
+					direction.add(0, -1);
+				if (leftButton.isPressed())
+					direction.add(-1, 0);
+				if (rightButton.isPressed())
+					direction.add(1, 0);
+
+				if (direction.len2() != 0) {
+					Vector2 gravity = customGravitySystem.getGravity();
+					gravity.set(direction.mul(gravity.len()));
+				}
 			}
-			
+
 			@Override
 			public void init(com.artemis.World world, Entity e) {
-				button = inputDevicesMonitor.getButton("extraGravity");
+				leftButton = inputDevicesMonitor.getButton("left");
+				rightButton = inputDevicesMonitor.getButton("right");
+				upButton = inputDevicesMonitor.getButton("up");
+				downButton = inputDevicesMonitor.getButton("down");
 			}
-			
+
 			@Override
 			public void dispose(com.artemis.World world, Entity e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		})).build();
 	}
@@ -209,13 +239,13 @@ public class PlayGameState extends GameStateImpl {
 
 		worldWrapper.render();
 
-//		worldCamera.apply();
-		
-		ImmediateModeRendererUtils.drawHorizontalAxis(Gdx.graphics.getHeight()/2f, Color.RED);
-		ImmediateModeRendererUtils.drawVerticalAxis(Gdx.graphics.getWidth()/2f,  Color.RED);
-		
-//		if (Game.isShowBox2dDebug())
-			box2dCustomDebugRenderer.render();
+		// worldCamera.apply();
+
+		ImmediateModeRendererUtils.drawHorizontalAxis(Gdx.graphics.getHeight() / 2f, Color.RED);
+		ImmediateModeRendererUtils.drawVerticalAxis(Gdx.graphics.getWidth() / 2f, Color.RED);
+
+		// if (Game.isShowBox2dDebug())
+		box2dCustomDebugRenderer.render();
 
 		// guiCamera.apply(spriteBatch);
 		// spriteBatch.begin();
@@ -230,7 +260,7 @@ public class PlayGameState extends GameStateImpl {
 		Synchronizers.synchronize(getDelta());
 		worldWrapper.update(getDeltaInMs());
 	}
-	
+
 	@Override
 	public void dispose() {
 		worldWrapper.dispose();

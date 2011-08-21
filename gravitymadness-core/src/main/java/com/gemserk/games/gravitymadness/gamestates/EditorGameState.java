@@ -13,10 +13,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.gemserk.commons.gdx.GameStateImpl;
+import com.gemserk.commons.gdx.games.SpatialImpl;
 import com.gemserk.commons.gdx.graphics.ImmediateModeRendererUtils;
 import com.gemserk.componentsengine.input.ButtonMonitor;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
+import com.gemserk.componentsengine.utils.ParametersWrapper;
 import com.gemserk.resources.ResourceManager;
 
 public class EditorGameState extends GameStateImpl {
@@ -87,7 +89,14 @@ public class EditorGameState extends GameStateImpl {
 		if(dumpButton.isPressed()){
 			System.out.println("DUMP");
 			for (Rectangle rect : rectangles) {
-				System.out.println(rect);
+				float zoom = 100;
+				float xscaled = rect.x / zoom;
+				float yscaled = rect.y / zoom;
+				float widthScaled = rect.width / zoom;
+				float heightScaled = rect.height / zoom;
+				
+				System.out.println(String.format("entityFactory.instantiate(entityTemplates.groundTemplate,new ParametersWrapper().put(\"spatial\", new SpatialImpl(%ff,%ff,%ff,%ff,0)));", xscaled,yscaled,widthScaled,heightScaled));
+				
 			}
 			System.out.println("ENDDUMP");
 		}
