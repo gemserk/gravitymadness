@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
-import com.gemserk.commons.artemis.events.EventListenerManagerImpl;
 import com.gemserk.commons.artemis.events.EventManager;
 import com.gemserk.commons.artemis.events.reflection.EventListenerReflectionRegistrator;
 import com.gemserk.commons.gdx.GlobalTime;
@@ -60,7 +59,6 @@ public class Game extends com.gemserk.commons.gdx.Game {
 	private SpriteBatch spriteBatch;
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 
-	private EventManager eventManager;
 
 	/**
 	 * Used to store global information about the game and to send data between GameStates and Screens.
@@ -71,12 +69,6 @@ public class Game extends com.gemserk.commons.gdx.Game {
 		return gameData;
 	}
 
-	/**
-	 * Used to communicate between gamestates.
-	 */
-	public EventManager getEventManager() {
-		return eventManager;
-	}
 
 	public Game() {
 	}
@@ -99,7 +91,6 @@ public class Game extends com.gemserk.commons.gdx.Game {
 
 		Preferences preferences = Gdx.app.getPreferences("gemserk-gravitymadness");
 
-		eventManager = new EventListenerManagerImpl();
 
 		resourceManager = new ResourceManagerImpl<String>();
 		GameResources.load(resourceManager);
@@ -107,12 +98,7 @@ public class Game extends com.gemserk.commons.gdx.Game {
 		fpsFont = resourceManager.getResourceValue("FpsFont");
 		spriteBatch = new SpriteBatch();
 
-		EventListenerReflectionRegistrator registrator = new EventListenerReflectionRegistrator(eventManager);
 
-		// registrator.registerEventListeners(playGameState);
-		// registrator.registerEventListeners(backgroundGameState);
-		// registrator.registerEventListeners(settingsGameState);
-		// registrator.registerEventListeners(this);
 
 		PlayGameState playGameState = new PlayGameState(this);
 		playGameState.setResourceManager(resourceManager);
@@ -171,7 +157,6 @@ public class Game extends com.gemserk.commons.gdx.Game {
 			}
 		}
 
-		eventManager.process();
 	}
 
 	@Override

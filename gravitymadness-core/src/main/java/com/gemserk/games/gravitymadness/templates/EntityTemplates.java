@@ -8,8 +8,6 @@ import com.gemserk.commons.artemis.EntityBuilder;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.TagComponent;
-import com.gemserk.commons.artemis.events.EventListenerManagerImpl;
-import com.gemserk.commons.artemis.events.EventManager;
 import com.gemserk.commons.artemis.templates.EntityFactory;
 import com.gemserk.commons.artemis.templates.EntityFactoryImpl;
 import com.gemserk.commons.artemis.templates.EntityTemplate;
@@ -34,17 +32,15 @@ public class EntityTemplates {
 	private final EntityFactory entityFactory;
 
 	private final Parameters parameters = new ParametersWrapper();
-	private final EventManager eventManager;
 	private final com.artemis.World world;
 
-	public EntityTemplates(World physicsWorld, com.artemis.World world, ResourceManager<String> resourceManager, EntityBuilder entityBuilder, EntityFactoryImpl entityFactory, EventListenerManagerImpl eventManager) {
+	public EntityTemplates(World physicsWorld, com.artemis.World world, ResourceManager<String> resourceManager, EntityBuilder entityBuilder, EntityFactoryImpl entityFactory) {
 		this.physicsWorld = physicsWorld;
 		this.world = world;
 		// TODO Auto-generated constructor stub
 		this.resourceManager = resourceManager;
 		this.entityBuilder = entityBuilder;
 		this.entityFactory = entityFactory;
-		this.eventManager = eventManager;
 		this.bodyBuilder = new BodyBuilder(physicsWorld);
 		this.mesh2dBuilder = new Mesh2dBuilder();
 	}
@@ -97,6 +93,10 @@ public class EntityTemplates {
 							.circleShape(0.1f)//
 							.density(1f) //
 							.build()) //
+					.fixture(bodyBuilder.fixtureDefBuilder()//
+							.sensor()//
+							.circleShape(0.1f)//
+							.build(), "feet")//
 					.build();
 
 			entity.addComponent(new TagComponent(Tags.PLAYER_TAG));

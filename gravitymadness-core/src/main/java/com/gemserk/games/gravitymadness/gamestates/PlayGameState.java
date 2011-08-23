@@ -14,7 +14,6 @@ import com.gemserk.commons.artemis.EntityBuilder;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.ScriptComponent;
-import com.gemserk.commons.artemis.events.EventListenerManagerImpl;
 import com.gemserk.commons.artemis.render.RenderLayers;
 import com.gemserk.commons.artemis.scripts.ScriptJavaImpl;
 import com.gemserk.commons.artemis.systems.ContainerSystem;
@@ -50,7 +49,6 @@ public class PlayGameState extends GameStateImpl {
 	private final Game game;
 	private ResourceManager<String> resourceManager;
 	private SpriteBatch spriteBatch;
-	private EventListenerManagerImpl eventManager;
 	private World physicsWorld;
 	private JointBuilder jointBuilder;
 	private Libgdx2dCameraTransformImpl worldCamera;
@@ -64,8 +62,7 @@ public class PlayGameState extends GameStateImpl {
 	private com.gemserk.games.gravitymadness.templates.EntityTemplates entityTemplates;
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 	private CustomGravitySystem customGravitySystem;
-	protected ButtonMonitor upButton;
-	protected ButtonMonitor downButton;
+	
 
 	public PlayGameState(Game game) {
 		this.game = game;
@@ -86,7 +83,6 @@ public class PlayGameState extends GameStateImpl {
 		float centerY = height / 2;
 		spriteBatch = new SpriteBatch();
 
-		eventManager = new EventListenerManagerImpl();
 
 		physicsWorld = new World(new Vector2(0, 0), false);
 
@@ -127,7 +123,7 @@ public class PlayGameState extends GameStateImpl {
 		entityBuilder = new EntityBuilder(world);
 
 		box2dCustomDebugRenderer = new Box2DCustomDebugRenderer((Libgdx2dCameraTransformImpl) worldCamera, physicsWorld);
-		entityTemplates = new EntityTemplates(physicsWorld, world, resourceManager, entityBuilder, entityFactory, eventManager);
+		entityTemplates = new EntityTemplates(physicsWorld, world, resourceManager, entityBuilder, entityFactory);
 
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
 		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {
@@ -172,9 +168,9 @@ public class PlayGameState extends GameStateImpl {
 				PhysicsComponent physicsComponent = entity.getComponent(physicscomponentclass);
 				Contact contact = physicsComponent.getContact();
 				if (contact.isInContact()) {
-					// Body body = physicsComponent.getBody();
-					// Vector2 contactForce = contact.getNormal().cpy().mul(10);
-					// body.applyForce(contactForce, body.getPosition());
+//					 Body body = physicsComponent.getBody();
+//					 Vector2 contactForce = contact.getNormal().cpy().mul(5);
+//					 body.applyForce(contactForce, body.getPosition());
 				}
 
 			}
@@ -196,25 +192,47 @@ public class PlayGameState extends GameStateImpl {
 			Class<PhysicsComponent> physicscomponentclass = PhysicsComponent.class;
 			private ButtonMonitor leftButton;
 			private ButtonMonitor rightButton;
-
+			protected ButtonMonitor upButton;
+			protected ButtonMonitor downButton;
 			private Vector2 direction = new Vector2();
 
 			@Override
 			public void update(com.artemis.World world, Entity e) {
-				direction.set(0, 0);
-				if (upButton.isPressed())
-					direction.add(0, 1);
-				if (downButton.isPressed())
-					direction.add(0, -1);
-				if (leftButton.isPressed())
-					direction.add(-1, 0);
-				if (rightButton.isPressed())
-					direction.add(1, 0);
-
-				if (direction.len2() != 0) {
-					Vector2 gravity = customGravitySystem.getGravity();
-					gravity.set(direction.mul(gravity.len()));
+				Vector2 gravity = customGravitySystem.getGravity();
+				Vector2 rightReferenceVector = gravity.cpy().rotate(90).nor();
+				Vector2 upReferenceVector = gravity.cpy().rotate(180).nor();
+				
+				Entity player = world.getTagManager().getEntity(Tags.PLAYER_TAG);
+				PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
+				Body body = physicsComponent.getBody();
+				Vector2 position = body.getPosition();
+				
+				float horizontalForce = 0.1f;
+				if(rightButton.isHolded()) {
+					body.applyForce(rightReferenceVector.cpy().mul(horizontalForce), position);
 				}
+				if(leftButton.isHolded())
+					body.applyForce(rightReferenceVector.cpy().mul(-horizontalForce), position);
+				
+				
+				Contact contact = physicsComponent.getContact();
+				Vector2 normal = new Vector2(0,0);
+				for(int i = 0; i < contact.getContactCount(); i++){
+					if(contact.isInContact(i)){
+						normal = contact.getNormal(i);
+						break;
+					}
+				}
+					
+				boolean grounded = false;
+				if(normal.dst(0, 1)< 0.01f)
+					grounded = true;
+				
+				if(grounded && upButton.isHolded()){
+					System.out.println("Saltando: " + normal);
+					body.applyForce(upReferenceVector.cpy().mul(5),position);
+				}
+				
 			}
 
 			@Override
@@ -265,6 +283,5 @@ public class PlayGameState extends GameStateImpl {
 	public void dispose() {
 		worldWrapper.dispose();
 		spriteBatch.dispose();
-		physicsWorld.dispose();
 	}
 }
