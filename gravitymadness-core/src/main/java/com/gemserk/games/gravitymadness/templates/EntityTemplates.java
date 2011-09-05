@@ -1,6 +1,7 @@
 package com.gemserk.games.gravitymadness.templates;
 
 import com.artemis.Entity;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.World;
@@ -95,7 +96,7 @@ public class EntityTemplates {
 							.build()) //
 					.fixture(bodyBuilder.fixtureDefBuilder()//
 							.sensor()//
-							.circleShape(0.1f)//
+							.circleShape(new Vector2(0,-0.1f),0.01f)//
 							.build(), "feet")//
 					.build();
 

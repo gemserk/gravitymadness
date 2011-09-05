@@ -24,7 +24,7 @@ public class CustomGravitySystem extends EntitySystem{
 			Body body = physicsComponent.getBody();
 			bodyGravity.set(gravity);
 			bodyGravity.mul(body.getMass());
-			body.applyForce(bodyGravity, body.getPosition());
+			body.applyForceToCenter(bodyGravity);
 		}
 	}
 

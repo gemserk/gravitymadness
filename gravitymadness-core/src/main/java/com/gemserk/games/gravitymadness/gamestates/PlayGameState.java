@@ -27,7 +27,8 @@ import com.gemserk.commons.artemis.systems.TagSystem;
 import com.gemserk.commons.artemis.templates.EntityFactoryImpl;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.Box2DCustomDebugRenderer;
-import com.gemserk.commons.gdx.box2d.Contact;
+import com.gemserk.commons.gdx.box2d.Contacts;
+import com.gemserk.commons.gdx.box2d.Contacts.Contact;
 import com.gemserk.commons.gdx.box2d.JointBuilder;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
@@ -62,7 +63,6 @@ public class PlayGameState extends GameStateImpl {
 	private com.gemserk.games.gravitymadness.templates.EntityTemplates entityTemplates;
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 	private CustomGravitySystem customGravitySystem;
-	
 
 	public PlayGameState(Game game) {
 		this.game = game;
@@ -82,7 +82,6 @@ public class PlayGameState extends GameStateImpl {
 		float centerX = width / 2;
 		float centerY = height / 2;
 		spriteBatch = new SpriteBatch();
-
 
 		physicsWorld = new World(new Vector2(0, 0), false);
 
@@ -130,10 +129,10 @@ public class PlayGameState extends GameStateImpl {
 			{
 				monitorKeys("pause", Keys.BACK, Keys.ESCAPE);
 				monitorKeys("switchControls", Keys.MENU, Keys.R);
-				monitorKey("left", Keys.LEFT);
-				monitorKey("right", Keys.RIGHT);
-				monitorKey("up", Keys.UP);
-				monitorKey("down", Keys.DOWN);
+				monitorKey("left", Keys.A);
+				monitorKey("right", Keys.D);
+				monitorKey("up", Keys.W);
+				monitorKey("down", Keys.S);
 			}
 		};
 
@@ -166,11 +165,11 @@ public class PlayGameState extends GameStateImpl {
 			public void update(com.artemis.World world, Entity e) {
 				Entity entity = world.getTagManager().getEntity(Tags.PLAYER_TAG);
 				PhysicsComponent physicsComponent = entity.getComponent(physicscomponentclass);
-				Contact contact = physicsComponent.getContact();
+				Contacts contact = physicsComponent.getContact();
 				if (contact.isInContact()) {
-//					 Body body = physicsComponent.getBody();
-//					 Vector2 contactForce = contact.getNormal().cpy().mul(5);
-//					 body.applyForce(contactForce, body.getPosition());
+					// Body body = physicsComponent.getBody();
+					// Vector2 contactForce = contact.getNormal().cpy().mul(5);
+					// body.applyForce(contactForce, body.getPosition());
 				}
 
 			}
@@ -201,38 +200,41 @@ public class PlayGameState extends GameStateImpl {
 				Vector2 gravity = customGravitySystem.getGravity();
 				Vector2 rightReferenceVector = gravity.cpy().rotate(90).nor();
 				Vector2 upReferenceVector = gravity.cpy().rotate(180).nor();
-				
+
 				Entity player = world.getTagManager().getEntity(Tags.PLAYER_TAG);
 				PhysicsComponent physicsComponent = player.getComponent(PhysicsComponent.class);
 				Body body = physicsComponent.getBody();
 				Vector2 position = body.getPosition();
-				
+
 				float horizontalForce = 0.1f;
-				if(rightButton.isHolded()) {
+				if (rightButton.isHolded()) {
 					body.applyForce(rightReferenceVector.cpy().mul(horizontalForce), position);
 				}
-				if(leftButton.isHolded())
+				if (leftButton.isHolded())
 					body.applyForce(rightReferenceVector.cpy().mul(-horizontalForce), position);
-				
-				
-				Contact contact = physicsComponent.getContact();
-				Vector2 normal = new Vector2(0,0);
-				for(int i = 0; i < contact.getContactCount(); i++){
-					if(contact.isInContact(i)){
-						normal = contact.getNormal(i);
-						break;
+
+				Contacts contacts = physicsComponent.getContact();
+				boolean grounded = false;
+				for (int i = 0; i < contacts.getContactCount(); i++) {
+					Contact contact = contacts.getContact(i);
+					if (contact.isInContact()) {
+						if ("feet".equals(contact.getMyFixture().getUserData())) {
+							grounded = true;
+							break;
+						}
 					}
 				}
-					
-				boolean grounded = false;
-				if(normal.dst(0, 1)< 0.01f)
-					grounded = true;
-				
-				if(grounded && upButton.isHolded()){
-					System.out.println("Saltando: " + normal);
-					body.applyForce(upReferenceVector.cpy().mul(5),position);
+
+
+				if (grounded && upButton.isPressed()) {
+					body.applyForceToCenter(upReferenceVector.cpy().mul(20));
 				}
 				
+				if(downButton.isPressed()){
+					worldCamera.rotate(customGravitySystem.getGravity().angle());
+					customGravitySystem.getGravity().rotate(90);
+				}
+
 			}
 
 			@Override
